@@ -35,6 +35,17 @@ if (buf.subarray(0, 8).equals(PNG_SIG)) {
   }
   width = buf.readUInt32BE(16);
   height = buf.readUInt32BE(20);
+  // IHDR data starts at offset 16: width (4), height (4), bit depth (1),
+  // color type (1). Accept only 8-bit truecolor (2), palette (3), or
+  // truecolor+alpha (6); grayscale/gray+alpha would lose the meme's colours.
+  const bitDepth = buf[24];
+  const colorType = buf[25];
+  if (bitDepth !== 8) {
+    fail(`entry.png bit depth must be 8, got ${bitDepth}`);
+  }
+  if (colorType !== 2 && colorType !== 3 && colorType !== 6) {
+    fail(`entry.png color type must be 2, 3 or 6, got ${colorType}`);
+  }
 } else if (buf[0] === 0xff && buf[1] === 0xd8) {
   // JPEG: whole file ends with the EOI marker FF D9.
   if (!(buf[buf.length - 2] === 0xff && buf[buf.length - 1] === 0xd9)) {
