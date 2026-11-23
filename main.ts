@@ -9,9 +9,13 @@
 // MAKEFUN_OUTPUT_DIR, no eval / Function / dynamic import.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, readFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ENTRY = "entry.png";
+// Resolve entry.png next to this script, not relative to the process cwd:
+// the server harness runs main.ts from a different working directory, so a
+// bare "entry.png" was not found and the run exited with code 1.
+const ENTRY = join(dirname(fileURLToPath(import.meta.url)), "entry.png");
 const ENTRY_SHA256 = "e503d5adbc3b60560a7936641fc8937f3b97a3d5835330630845681ce8221cbd";
 const MAX_BYTES = 1048576;
 const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
